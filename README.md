@@ -10,6 +10,22 @@ Ask about the weather, latest news, or anything on the web — the backend agent
 
 The application allows users to ask natural language questions through a clean, modern chat interface. Behind the scenes, an intelligent **MCP Agent** parses the query, selects the appropriate tools (weather API, news API, or DuckDuckGo web search), executes them in parallel if needed, and synthesizes a coherent response using a multi-provider LLM chain.
 
+### 🏗️ System Architecture Flow
+
+```text
+1️⃣ User Input  ──▶ 2️⃣ Frontend (Vercel Edge Network)
+[Browser]          [HTML5 / TailwindCSS / Vanilla JS]
+                       │
+                       ▼ 
+                 3️⃣ Backend API (Vercel Serverless Functions)
+                   [Python / FastAPI / Pydantic]
+                       │
+       ┌───────────────┴───────────────┐
+       ▼                               ▼
+4️⃣ Brain/Orchestrator          5️⃣ External Tools 
+[Groq Llama 70b / OpenAI]       [OpenWeatherMap / NewsAPI / DuckDuckGo]
+```
+
 **Key Highlights:**
 
 | Feature | Description |
