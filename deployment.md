@@ -6,6 +6,26 @@ Two separate Vercel projects from the same GitHub repo:
 
 ---
 
+## 🏗️ System Architecture Flow
+
+Here is how data flows securely through the technologies used in this system:
+
+```text
+1️⃣ User Input  ──▶ 2️⃣ Frontend (Vercel Edge Network)
+[Browser]          [HTML5 / TailwindCSS / Vanilla JS]
+                       │
+                       ▼ 
+                 3️⃣ Backend API (Vercel Serverless Functions)
+                   [Python / FastAPI / Pydantic]
+                       │
+       ┌───────────────┴───────────────┐
+       ▼                               ▼
+4️⃣ Brain/Orchestrator          5️⃣ External Tools 
+[Groq Llama 70b / OpenAI]       [OpenWeatherMap / NewsAPI / DuckDuckGo]
+```
+
+---
+
 ## 📋 Prerequisites
 
 - [ ] [GitHub](https://github.com) account
@@ -43,29 +63,35 @@ Two separate Vercel projects from the same GitHub repo:
 
 ## Step 2 — Deploy the Backend
 
-### 2.1 — Import the repo
+### 2.1 — Import the repo into Vercel
 
-1. Go to [vercel.com/new](https://vercel.com/new) and click **"Import Git Repository"**.
-2. Select your `nexus-ai-assistant` repo.
+1. Log into your Vercel account.
+2. From the Vercel dashboard horizon, click the **"Add New..."** button in the top right corner and select **"Project"**.
+3. In the "Import Git Repository" section, find `Nexus-AI-Assistant` in the list (you may need to connect your GitHub account if you haven't).
+4. Click the **"Import"** button next to the repository.
 
 ### 2.2 — Set the Root Directory to `backend`
 
 > [!IMPORTANT]
-> This is the critical step. Vercel will only see and deploy the `backend/` folder.
+> This is the critical step. Vercel will only see and deploy the `backend/` folder. If you skip this, Vercel won't know how to run Python.
 
-On the configuration screen:
+On the "Configure Project" screen, follow exactly these steps:
 
-| Setting | Value |
-|---|---|
-| **Root Directory** | `backend` |
-| **Framework Preset** | Other |
-| **Build Command** | *(leave blank)* |
-| **Output Directory** | *(leave blank)* |
-| **Install Command** | `pip install -r requirements.txt` |
+1. **Project Name**: You can name it `nexus-backend`.
+2. **Framework Preset**: Click this dropdown and select **Other** (it may auto-detect this).
+3. **Root Directory**: Click the **"Edit"** button. A file browser will pop up. Click the radio button next to the `backend` folder, then click **"Continue"**. 
+4. Open the **"Build and Output Settings"** toggle.
+5. In the **Install Command** field, toggle "Override" and type exactly: `pip install -r requirements.txt`
 
 ### 2.3 — Add environment variables
 
-| Variable | Value |
+Still on the "Configure Project" screen (before clicking Deploy), look for the **"Environment Variables"** dropdown area below the Build and Output settings. 
+
+1. Click the toggle to expand **Environment Variables**.
+2. For each key below, paste the variable name into "Key" and your exact key into "Value".
+3. Click the **"Add"** button for each one until all keys are added to the list below it.
+
+| Key | Value |
 |---|---|
 | `OPENWEATHER_API_KEY` | your OpenWeatherMap key |
 | `NEWS_API_KEY` | your NewsAPI key |
@@ -73,13 +99,15 @@ On the configuration screen:
 | `FALLBACK_API_KEY` | your OpenAI key *(optional)* |
 | `ANTHROPIC_API_KEY` | your Anthropic key *(optional)* |
 
-### 2.4 — Deploy
+### 2.4 — Click Deploy
 
-Click **"Deploy"**. Wait ~1–2 minutes. You'll get a backend URL like:
-```
-https://nexus-backend-xxx.vercel.app
-```
-**Copy this URL — you need it for Step 3.**
+1. After adding all your keys, scroll down to the very bottom of the "Configure Project" panel.
+2. Click the large blue **"Deploy"** button.
+3. Wait ~1–2 minutes while Vercel builds the Python endpoints. Once it succeeds, Vercel will direct you to a success page.
+4. Click "Continue to Dashboard".
+5. In your Vercel project dashboard, look at the top for the "Domains" section to find your live backend URL (it will look like `https://nexus-backend-xxx.vercel.app`).
+
+**Copy this URL — you absolutely need it for Step 3.**
 
 ### 2.5 — Verify the backend
 
@@ -92,17 +120,28 @@ https://nexus-backend-xxx.vercel.app
 
 ## Step 3 — Connect the Frontend to the Backend
 
-Before deploying the frontend, update it to point at your live backend URL.
+Before deploying the frontend, you must update the static HTML files to point at your live, cloud-hosted backend.
 
-1. Open `frontend/index.html` and find this line:
+1. Open the file `frontend/index.html` locally in your code editor (e.g., VS Code).
+2. Scroll to the very beginning of the script tag (around line 10), and find this exact code:
    ```html
-   <script>window.BACKEND_URL = "https://your-backend.vercel.app";</script>
+    <script>
+        // Automatically switch between localhost and the deployed backend.
+        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+            window.BACKEND_URL = "http://localhost:8001";
+        } else {
+            // ✏️ Replace this with your actual live backend URL from step 2.4 (No trailing slash)
+            window.BACKEND_URL = "https://your-backend.vercel.app";
+        }
+    </script>
    ```
-2. Replace `https://your-backend.vercel.app` with your actual backend URL from Step 2.4.
-3. Commit and push:
+3. Inside the `else` block, replace `https://your-backend.vercel.app` with your actual live backend URL from step 2.4. *Make sure you do NOT include `/api` or a trailing slash at the end of the URL!*
+   **Correct Example:** `window.BACKEND_URL = "https://nexus-backend-xyz.vercel.app";`
+4. Save the file.
+5. Commit and push the updated file to GitHub so Vercel can see the change:
    ```bash
    git add frontend/index.html
-   git commit -m "Point frontend to deployed backend URL"
+   git commit -m "Point frontend to live backend URL"
    git push origin main
    ```
 
@@ -112,18 +151,19 @@ Before deploying the frontend, update it to point at your live backend URL.
 
 ### 4.1 — Import the repo again (new project)
 
-1. Go to [vercel.com/new](https://vercel.com/new) and **import the same repo** again.
-2. Vercel will create a **second separate project** from the same repository.
+1. Go back to your main Vercel dashboard.
+2. Click **"Add New..."** -> **"Project"**.
+3. **Import the exact same `Nexus-AI-Assistant` repository** again from your GitHub list.
+4. Vercel will allow you to create a **second separate project** out of the same repository.
 
 ### 4.2 — Set the Root Directory to `frontend`
 
-| Setting | Value |
-|---|---|
-| **Root Directory** | `frontend` |
-| **Framework Preset** | Other |
-| **Build Command** | *(leave blank)* |
-| **Output Directory** | *(leave blank)* |
-| **Install Command** | *(leave blank)* |
+Follow exactly these steps on the Configure screen:
+
+1. **Project Name**: Name it `nexus-frontend`.
+2. **Root Directory**: Click the **"Edit"** button. Select the `frontend` folder from the popup list and click **"Continue"**.
+3. **Framework Preset**: Leave it as **Other**.
+4. **Build and Output Settings**: Leave these completely blank. No build command is needed.
 
 > No environment variables needed for the frontend — it's pure HTML/CSS/JS.
 
