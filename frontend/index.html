@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus MCP | Smart Tool Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <!-- ✏️ For production: replace with your deployed Vercel backend URL -->
+    <!-- ✏️ For local dev: keep as http://localhost:8001 -->
+    <script>window.BACKEND_URL = "http://localhost:8001";</script>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="glass-nav fixed top-0 w-full z-50 py-4 px-6 md:px-12 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">N</div>
+            <span class="text-xl font-bold tracking-tight">Nexus <span class="text-indigo-400">Assistant</span></span>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <span class="text-xs text-indigo-400 bg-indigo-400/10 px-3 py-1 rounded-full font-bold">PUBLIC ACCESS</span>
+        </div>
+    </nav>
+
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --primary: #38bdf8; /* Modern Light Blue */
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .bg-light-blue { background-color: var(--primary); }
+        .text-light-blue { color: var(--primary); }
+        .border-light-blue { border-color: var(--primary); }
+    </style>
+    <main class="flex-grow pt-32 px-4 pb-20">
+        <!-- Hero Search Section -->
+        <section id="hero" class="max-w-4xl mx-auto text-center mb-16">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
+                What can I help you find today?
+            </h1>
+            <p class="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
+                Ask about the weather, latest news, or search the web. Our MCP Agent orchestrates everything intelligently.
+            </p>
+            
+            <div class="relative max-w-2xl mx-auto group">
+                <input type="text" id="query-input" 
+                    placeholder="E.g., Weather in Tokyo and latest NASA news"
+                    class="w-full bg-white/5 border border-white/10 p-5 pr-32 rounded-2xl text-white text-lg transition-all focus:ring-2 focus:ring-[#38bdf8]/50 focus:border-[#38bdf8] shadow-2xl glass-panel search-input">
+                <button onclick="handleQuery()" id="search-button" class="absolute right-2 top-2 bottom-2 px-6 py-2 rounded-xl text-white font-semibold transform transition-all duration-300 active:scale-95" style="background-color: var(--primary);">
+                    <span class="flex items-center space-x-2">
+                        <span id="btn-text">Search</span>
+                        <div id="btn-loader" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Display -->
+        <section id="results-section" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Results cards will be dynamically injected here -->
+        </section>
+
+        <!-- Initial State Info -->
+        <div id="empty-state" class="text-center py-20 opacity-40">
+            <div class="text-6xl mb-4">🧠</div>
+            <p>Ready to process your natural language queries...</p>
+        </div>
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-gray-600 text-sm">
+        &copy; 2026 Nexus MCP Tool Calling Application. Powered by Groq and LangChain.
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
